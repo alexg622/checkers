@@ -13,16 +13,20 @@ const movePiece = () => {
   squares.forEach(square => {
     square.addEventListener("click", (e) => {
       let target = e.target
-      highlightSquare(target, e)
+      highlightSquare(target)
 
-      blackPiece(target, e)
-      if((squareEmpty(target, e) === false && player === "black" && blackPiece(target, e)) || (squareEmpty(target, e) === false && player === "red" && redPiece(target, e))) {
+      if((squareEmpty(target) === false && player === "black" && blackPiece(target)) || (squareEmpty(target) === false && player === "red" && redPiece(target))) {
         squareOne = target
         if(Array.from(target.classList).includes("piece")) squareOne = e.target.parentElement
-      } else if(squareOne !== false && validMove){
+      } else if((squareOne !== false && player === "black" && validMoveBlack(target)) || (squareOne !== false && player === "red" && validMoveRed(target))){
         if(Array.from(target.classList).includes("piece")) target = e.target.parentElement
-        if(player === "black") target.innerHTML += "<div class='piece black-piece'></div>"
-        if(player === "red") target.innerHTML += "<div class='piece red-piece'></div>"
+        if(player === "black") {
+          player = "red"
+          target.innerHTML += "<div class='piece black-piece'></div>"
+        } else if (player === "red") {
+          player = "black"
+          target.innerHTML += "<div class='piece red-piece'></div>"
+        }
         squareOne.innerHTML = ""
         highlightedSquare = null
         squareOne = false
@@ -31,13 +35,14 @@ const movePiece = () => {
   })
 }
 
-const highlightSquare = (target, e) => {
-  if(Array.from(target.classList).includes("piece")) target = e.target.parentElement
+const highlightSquare = (target) => {
+  if(Array.from(target.classList).includes("piece")) target = target.parentElement
   if(typeof target.childNodes[1] === "object") {
     if(highlightedSquare !== target) {
       target.childNodes[1].style.border = "4px solid yellow"
       if(highlightedSquare) {
-        highlightedSquare.childNodes[1].style.border = ""
+        if(highlightedSquare.childNodes.length > 1) highlightedSquare.childNodes[1].style.border = ""
+        if(highlightedSquare.childNodes.length === 1) highlightedSquare.childNodes[0].style.border = ""
       }
       highlightedSquare = target
     }
@@ -45,15 +50,16 @@ const highlightSquare = (target, e) => {
       if(highlightedSquare !== target) {
         target.childNodes[0].style.border = "4px solid yellow"
         if(highlightedSquare) {
-        highlightedSquare.childNodes[0].style.border = ""
+          if(highlightedSquare.childNodes.length > 1) highlightedSquare.childNodes[1].style.border = ""
+          if(highlightedSquare.childNodes.length === 1) highlightedSquare.childNodes[0].style.border = ""
       }
       highlightedSquare = target
     }
   }
 }
 
-const blackPiece = (target, e) => {
-  if(Array.from(target.classList).includes("piece")) target = e.target.parentElement
+const blackPiece = (target) => {
+  if(Array.from(target.classList).includes("piece")) target = target.parentElement
   if(typeof target.childNodes[1] === "object") {
     if(Array.from(target.childNodes[1].classList).includes("black-piece")) return true
     return false
@@ -63,8 +69,8 @@ const blackPiece = (target, e) => {
   }
 }
 
-const redPiece = (target, e) => {
-  if(Array.from(target.classList).includes("piece")) target = e.target.parentElement
+const redPiece = (target) => {
+  if(Array.from(target.classList).includes("piece")) target = target.parentElement
   if(typeof target.childNodes[1] === "object") {
     if(Array.from(target.childNodes[1].classList).includes("red-piece")) return true
     return false
@@ -74,8 +80,56 @@ const redPiece = (target, e) => {
   }
 }
 
-const squareEmpty = (target, e) => {
-  if(Array.from(target.classList).includes("piece")) target = e.target.parentElement
+const squareEmpty = (target) => {
+  if(Array.from(target.classList).includes("piece")) target = target.parentElement
   if (target.childNodes.length > 0) return false
+  return true
+}
+
+const validMoveBlack = (target) => {
+  if(Array.from(target.classList).includes("piece")) target = target.parentElement
+  cordsOne = target.classList[0].split("-")
+  cordsTwo = highlightedSquare.classList[0].split("-")
+  squareColor = target.classList[1].split("-")[0]
+  if (parseInt(cordsTwo[1]) <= parseInt(cordsOne[1])) return false
+  if (squareColor === "white") return false
+  if ((parseInt(cordsTwo[3]) + 1) !== parseInt(cordsOne[3]) && (parseInt(cordsTwo[3]) - 1) !== parseInt(cordsOne[3])) return false
+  if (target.childNodes.length > 1) {
+    if (target.childNodes[1].classList.includes("black-piece")) {
+      return false
+    } else {
+      // jump piece
+    }
+  } else if(target.childNodes.length === 1) {
+    if (target.childNodes[0].classList.includes("black-piece")) {
+      return false
+    } else {
+      // jump piece
+    }
+  }
+  return true
+}
+
+const validMoveRed = (target) => {
+  if(Array.from(target.classList).includes("piece")) target = target.parentElement
+  cordsOne = target.classList[0].split("-")
+  cordsTwo = highlightedSquare.classList[0].split("-")
+  squareColor = target.classList[1].split("-")[0]
+  if (parseInt(cordsTwo[1]) >= parseInt(cordsOne[1])) return false
+  if (squareColor === "white") return false
+  if ((parseInt(cordsTwo[3]) + 1) !== parseInt(cordsOne[3]) && (parseInt(cordsTwo[3]) - 1) !== parseInt(cordsOne[3])) return false
+  if (target.childNodes.length > 1) {
+    if (target.childNodes[1].classList.includes("red-piece")) {
+      return false
+    } else {
+      // jump piece
+    }
+  } else if(target.childNodes.length === 1) {
+    if (target.childNodes[0].classList.includes("red-piece")) {
+      return false
+    } else {
+      // jump piece
+    }
+  }
   return true
 }
