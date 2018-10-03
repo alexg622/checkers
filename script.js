@@ -14,7 +14,6 @@ const movePiece = () => {
     square.addEventListener("click", (e) => {
       let target = e.target
       highlightSquare(target)
-
       if((squareEmpty(target) === false && player === "black" && blackPiece(target)) || (squareEmpty(target) === false && player === "red" && redPiece(target))) {
         squareOne = target
         if(Array.from(target.classList).includes("piece")) squareOne = e.target.parentElement
